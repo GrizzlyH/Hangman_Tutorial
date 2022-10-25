@@ -3,6 +3,20 @@ import random
 
 
 #  Hangman Button Objects
+class HangmanButton:
+    def __init__(self, position, image, letter):
+        self.position = position
+        self.letter = letter
+        self.image = image
+        self.imageRect = pygame.Rect(self.position[0] - 5, self.position[1], 30, 30)
+        self.active = True
+
+
+    def draw(self, window):
+        """Draw the letter to the screen, with a box around it."""
+        if self.active:
+            window.blit(self.image, self.position)
+            pygame.draw.rect(window, WHITE, [self.imageRect[0], self.imageRect[1], self.imageRect[2], self.imageRect[3]], 1)
 
 
 #  Utility Functions
@@ -18,6 +32,54 @@ def openFile():
             for word in wordList:
                 if len(word.strip()) >= 3 and len(word.strip()) <= 10:
                     WORDLIST.append(word.strip())
+
+
+def selectRandomWord():
+    """Select a random word from the Word List Generated"""
+    return random.choice(WORDLIST)
+
+
+def drawLetters(letter):
+    """Creates the font object for text on the screen."""
+    text = pygame.font.SysFont('Comic sans', 22)
+    printText = text.render(letter, 1, WHITE)
+    return printText
+
+
+def drawLetterLines(word):
+    """Draw lines for each letter in chosen word"""
+    wordLengthX = len(word) * (25 + 15)
+
+    startXY = [SCREENWIDTH - 50 - wordLengthX, 350]
+    lengthXY = [25, 0]
+    spacing = [15, 0]
+
+    for ind, letter in enumerate(word):
+        pygame.draw.line(GAMESCREEN, WHITE, (startXY[0], startXY[1]), (startXY[0] + lengthXY[0], startXY[1] + lengthXY[1]), 3)
+        GAMESCREEN.blit(drawLetters(guessWord[ind]), (startXY[0]+10, 320))
+        startXY[0] = startXY[0] + lengthXY[0] + spacing[0]
+        startXY[1] = startXY[1] + lengthXY[1] + spacing[1]
+
+
+def createAlphabet():
+    """Creates the alphabet objects for screen"""
+    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    xPos = 100
+    yPos = 500
+    letNum = 0
+    for num in [9, 9, 8]:
+        for _ in range(num):
+            ALPHABETBUTTONS.append(HangmanButton((xPos, yPos), drawLetters(alphabet[letNum]), alphabet[letNum]))
+            letNum += 1
+            xPos += 50
+        xPos = 100
+        yPos += 40
+
+
+def drawAlphabet(itemList):
+    """Draws the alhpabet to the screen."""
+    for item in itemList:
+        item.draw(GAMESCREEN)
 
 
 #  Hangman Animation Functions
@@ -85,9 +147,12 @@ def drawHangman(window, numberGuesses):
 #  Hangman Words list
 WORDLIST = []
 openFile()
+ALPHABETBUTTONS = []
+
 
 #  initialization of the pygame module
 pygame.init()
+
 
 #  Game settings
 SCREENWIDTH = 800
@@ -98,8 +163,14 @@ WHITE = (255, 255, 255)
 GAMESCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 pygame.display.set_caption('Hang Man')
 
-#  Game Variables anf load functions
+#  Game Variables and load functions
 numberOfGuesses = 3
+chosenWord = selectRandomWord().upper()
+guessWord = [' ' for letter in chosenWord]
+createAlphabet()
+print(chosenWord)
+print(guessWord)
+
 
 #  Main game loop.
 RUN = True
@@ -113,6 +184,8 @@ while RUN:
         if event.type == pygame.QUIT:
             RUN = False
 
+    drawLetterLines(chosenWord)
+    drawAlphabet(ALPHABETBUTTONS)
     drawHangman(GAMESCREEN, numberOfGuesses)
 
     #  Update the display screen
