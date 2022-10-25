@@ -22,7 +22,7 @@ class HangmanButton:
 #  Utility Functions
 def openFile():
     """Open and load words from the text file into a simple list"""
-    with open('easyWordList.txt', 'r') as file:
+    with open('../easyWordList.txt', 'r') as file:
         content = file.readlines()
         newList = []
         for itemList in content:
